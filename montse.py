@@ -15,4 +15,6 @@ async def on_ready():
 async def hola(ctx):
     await ctx.respond("Hola, Blissett")
 
+
+
 bot.run(os.getenv('TOKEN')) # run the bot with the token

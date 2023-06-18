@@ -13,4 +13,6 @@ class PgDB:
         self.connection = pg.connect(DATABASE_URL)
         self.cursor = self.connection.cursor()
     
-    #####
+    def execute(self, query):
+        self.cursor.execute(query)
+        self.connection.commit()
