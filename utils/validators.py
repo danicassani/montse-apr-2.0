@@ -16,10 +16,19 @@ def is_temaikens_channel(ctx : discord.Message):
     TEMAIKENS_CHANNEL_ID = int(os.environ.get("TEMAIKENS_CHANNEL_ID"))
     return ctx.channel.id == TEMAIKENS_CHANNEL_ID
 
-def is_human(ctx : discord.Message):
+def is_bot(ctx : discord.Message):
     """Validate that the message was not sent by a bot"""
-    return not ctx.author.bot
+    return ctx.author.bot
 
-def is_admin(ctx : AppCtx):
-    """Validate that the user has the Admin role"""
-    return ctx.author.guild_permissions.administrator
+def is_reference_to_audio_file(ctx: discord.Message, bot : discord.Bot):
+    """Validate that the message is a reference"""
+    if ctx.reference is None:
+        return False
+    ref : discord.message.MessageReference = ctx.reference
+    ref_msg : discord.Message= bot.get_message(ref.message_id)
+
+    return contains_audio_attatchment(ref_msg)
+
+def not_allowed_message(ctx: discord.Message, bot : discord.Bot):
+    """Validate that the message is not allowed"""
+    return is_temaikens_channel(ctx) and not ( contains_audio_attatchment(ctx) or is_reference_to_audio_file(ctx, bot) )
