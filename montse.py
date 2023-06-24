@@ -2,15 +2,16 @@ import discord
 
 from discord.commands.context import ApplicationContext as AppCtx
 from discord.message import Message as Msg
-from discord.ext.commands import Group
 
-import json
 import random
 
 import os # default module
 from dotenv import load_dotenv
 from utils.validators import not_allowed_message, is_temaikens_channel, is_bot
 from utils.constants import MODERATION_PHRASES, MONTSE_PHRASES
+
+from asgiref.sync import sync_to_async
+from db.models import User, Warning
 
 load_dotenv() # load all the variables from the env file
 TEMAIKENS_CHANNEL_ID = int(os.environ.get("TEMAIKENS_CHANNEL_ID"))
@@ -29,9 +30,14 @@ async def on_ready():
 @bot.event
 async def on_message(msg : Msg):
     print(f"{msg.author}: {msg.content}")
+    user = await User.objects.filter(discord_user_id=msg.author.id).afirst()
 
     if is_bot(msg):
         return
+    
+    if not user:
+        user = await User.objects.acreate(discord_user_id=msg.author.id)
+        await user.asave()
     
     if "montse" in msg.content.lower() and not is_temaikens_channel(msg):
         montse_phrase = random.choice(MONTSE_PHRASES)
@@ -41,6 +47,12 @@ async def on_message(msg : Msg):
         await msg.delete()
         await msg.channel.send(f"{msg.author.mention} Mensaje no permitido.", delete_after=5)
         await msg.author.send(MODERATION_PHRASES["no_temaiken"])
+        user = await User.objects.aget(discord_user_id=msg.author.id)
+        warning = await Warning.objects.acreate(user=user,
+                          reason="Mensaje no permitido en canal Temaikens.",
+                          message=msg.content)
+        await warning.asave()
+
 
 
 @bot.slash_command(name = "hola", 

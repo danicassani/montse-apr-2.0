@@ -37,7 +37,7 @@ DATABASES = {
         'NAME': name,
         'USER': user,
         'PASSWORD': password,
-        'HOST': hostname,
+        'HOST': 'postgres',
         'PORT': port,
     }
 }

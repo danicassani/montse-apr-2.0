@@ -1,13 +1,20 @@
 import sys
+import django 
 from django.utils import timezone
 from django.core.validators import int_list_validator
 from django.core import validators
+import os
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings')
+
+django.setup()
 
 try:
     from django.db import models
 except Exception:
     print('Exception: Django Not Found, please install it with "pip install django".')
     sys.exit()
+
 
 time_signature_validator = [
     validators.RegexValidator(
@@ -16,6 +23,14 @@ time_signature_validator = [
         code='invalid_time_signature'
     )
 ]
+
+class Warning(models.Model):
+    user = models.ForeignKey('User', on_delete=models.PROTECT)
+    reason = models.CharField(max_length=200)
+    message = models.CharField(max_length=1000)
+    date = models.DateTimeField(auto_now_add=True)
+    def __str__(self):
+        return f"Warning: {self.user} - {self.reason}"
 
 class User(models.Model):
     discord_user_id = models.BigIntegerField(unique=True)
