@@ -39,7 +39,18 @@ class User(models.Model):
 
     def __str__(self):
         return f"{self.discord_user_id}"
-    
+
+class Suggestion(models.Model):
+    suggester = models.ForeignKey(User, on_delete=models.PROTECT, related_name='suggester')
+    reviewer = models.ForeignKey(User, on_delete=models.PROTECT, related_name='suggestion_reviewer', null=True)
+    title = models.CharField(max_length=200)
+    content = models.CharField(max_length=2000)
+    resolution = models.CharField(max_length=2000, null=True)
+    date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.suggester} suggested:\n{self.title}\n{self.text}"
+        
 class LevelPerformance(models.Model):
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     trials = models.IntegerField(default=0)
@@ -98,11 +109,11 @@ class FrequencyRecognitionLevel(models.Model):
         return f"Frequency Recognition Level {self.level_number}"
 
 class Excercise(models.Model):
-    name = models.CharField(max_length=100, unique=True)
+    title = models.CharField(max_length=100, unique=True)
     description = models.CharField(max_length=1000)
     difficulty = models.IntegerField(default=0)
     def __str__(self):
-        return f"Excercise: {self.name}"
+        return f"Excercise: {self.title}"
 
 class Tune(models.Model):
     excercise = models.ForeignKey(Excercise, on_delete=models.PROTECT)
@@ -117,7 +128,7 @@ class Tune(models.Model):
 
 class Phrase(models.Model):
     author = models.ForeignKey(User, on_delete=models.PROTECT, related_name='author')
-    reviewer = models.ForeignKey(User, on_delete=models.PROTECT, related_name='reviewer')
+    reviewer = models.ForeignKey(User, on_delete=models.PROTECT, related_name='phrase_reviewer', default=None, null=True)
     content = models.CharField(max_length=300)
     context = models.CharField(max_length=1000)
     date = models.DateTimeField(auto_now_add=True)
