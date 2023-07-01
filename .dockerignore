@@ -1,0 +1,6 @@
+migrations/
+README.md
+runcontainerPG.sh
+venv/
+postgresql/
+migrations/
